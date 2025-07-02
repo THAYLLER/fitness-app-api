@@ -53,6 +53,13 @@ describe('Auth e2e', () => {
       .expect(200);
 
     expect(refreshResponse.body.token).toBeDefined();
+
+    const meResponse = await request(app.getHttpServer())
+      .get('/users/me')
+      .set('Authorization', `Bearer ${response.body.token}`)
+      .expect(200);
+
+    expect(meResponse.body.email).toBe('user@stark.com');
   });
 
   it('deve retornar 401 para credenciais inválidas', async () => {
@@ -67,5 +74,9 @@ describe('Auth e2e', () => {
       .post('/auth/refresh')
       .send({ refreshToken: 'token_invalido' })
       .expect(401);
+  });
+
+  it('deve retornar 401 sem token', async () => {
+    await request(app.getHttpServer()).get('/users/me').expect(401);
   });
 }); 
