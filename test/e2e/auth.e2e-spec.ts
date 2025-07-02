@@ -44,12 +44,28 @@ describe('Auth e2e', () => {
       .expect(200);
 
     expect(response.body.token).toBeDefined();
+    const refreshToken = response.body.refreshToken;
+
+    // refresh token válido
+    const refreshResponse = await request(app.getHttpServer())
+      .post('/auth/refresh')
+      .send({ refreshToken })
+      .expect(200);
+
+    expect(refreshResponse.body.token).toBeDefined();
   });
 
   it('deve retornar 401 para credenciais inválidas', async () => {
     await request(app.getHttpServer())
       .post('/auth/login')
       .send({ email: 'user@stark.com', password: 'senha_errada' })
+      .expect(401);
+  });
+
+  it('deve retornar 401 para refresh token inválido', async () => {
+    await request(app.getHttpServer())
+      .post('/auth/refresh')
+      .send({ refreshToken: 'token_invalido' })
       .expect(401);
   });
 }); 

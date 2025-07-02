@@ -7,6 +7,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthenticateUserUseCase } from './use-cases/authenticate-user.use-case';
+import { RefreshTokenUseCase } from './use-cases/refresh-token.use-case';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AuthenticateUserUseCase } from './use-cases/authenticate-user.use-case'
   providers: [
     RegisterUserUseCase,
     AuthenticateUserUseCase,
+    RefreshTokenUseCase,
     {
       provide: UsersRepository,
       useClass: PrismaUsersRepository,
