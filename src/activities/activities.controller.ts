@@ -1,17 +1,19 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Get, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiTags, ApiUnauthorizedResponse, ApiBadRequestResponse, ApiQuery, ApiOkResponse } from '@nestjs/swagger';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Get, Query, Param } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiTags, ApiUnauthorizedResponse, ApiBadRequestResponse, ApiQuery, ApiOkResponse, ApiNotFoundResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { CreateActivityResponseDto } from './dto/create-activity-response.dto';
 import { CreateActivityUseCase } from './use-cases/create-activity.use-case';
 import { ListActivitiesUseCase } from './use-cases/list-activities.use-case';
+import { GetActivityUseCase } from './use-cases/get-activity.use-case';
 
 @ApiTags('Activities')
 @Controller('activities')
 export class ActivitiesController {
   constructor(private readonly createActivityUseCase: CreateActivityUseCase,
-              private readonly listActivitiesUseCase: ListActivitiesUseCase) {}
+              private readonly listActivitiesUseCase: ListActivitiesUseCase,
+              private readonly getActivityUseCase: GetActivityUseCase) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -46,5 +48,19 @@ export class ActivitiesController {
     @Query('offset') offset?: number,
   ) {
     return this.listActivitiesUseCase.execute(user.id, Number(limit) || 10, Number(offset) || 0);
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: CreateActivityResponseDto })
+  @ApiNotFoundResponse({ description: 'Não encontrada.' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado.' })
+  async findOne(
+    @CurrentUser() user: { id: string },
+    @Param('id') id: string,
+  ) {
+    return this.getActivityUseCase.execute(id, user.id);
   }
 } 

@@ -30,4 +30,9 @@ export class PrismaActivitiesRepository implements ActivitiesRepository {
     });
     return activities as Activity[];
   }
+
+  async findById(id: string, userId: string): Promise<Activity | null> {
+    const activity = await this.prisma.activity.findFirst({ where: { id, userId } });
+    return activity as Activity;
+  }
 } 

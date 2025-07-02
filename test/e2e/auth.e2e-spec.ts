@@ -7,6 +7,7 @@ import { PrismaService } from '../../src/prisma/prisma.service';
 describe('Auth e2e', () => {
   let app: INestApplication;
   let prisma: PrismaService;
+  let activityId: string;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -69,6 +70,8 @@ describe('Auth e2e', () => {
       .expect(201);
 
     expect(activityRes.body.name).toBe('Corrida');
+
+    activityId = activityRes.body.id;
   });
 
   it('deve retornar 401 para credenciais inválidas', async () => {
@@ -87,5 +90,20 @@ describe('Auth e2e', () => {
 
   it('deve retornar 401 sem token', async () => {
     await request(app.getHttpServer()).get('/users/me').expect(401);
+  });
+
+  it('deve retornar atividade por ID', async () => {
+    const login = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email: 'user@stark.com', password: 'password123' })
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .get(`/activities/${activityId}`)
+      .set('Authorization', `Bearer ${login.body.token}`)
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.id).toBe(activityId);
+      });
   });
 }); 
