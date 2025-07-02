@@ -8,6 +8,7 @@ export class InMemoryActivitiesRepository implements ActivitiesRepository {
     const activity: Activity = {
       id: Math.random().toString(36).substring(2, 15),
       createdAt: new Date(),
+      updatedAt: new Date(),
       ...data,
     } as Activity;
     this.activities.push(activity);
@@ -20,5 +21,14 @@ export class InMemoryActivitiesRepository implements ActivitiesRepository {
 
   async findById(id: string, userId: string): Promise<Activity | null> {
     return this.activities.find((a)=> a.id===id && a.userId===userId) ?? null;
+  }
+
+  async update(id: string, userId: string, data: { name: string; duration: number; intensity: string }): Promise<Activity | null> {
+    const idx = this.activities.findIndex((a)=> a.id===id && a.userId===userId);
+    if (idx === -1) return null;
+    const current = this.activities[idx];
+    const updated = { ...current, ...data, updatedAt: new Date() } as Activity;
+    this.activities[idx] = updated;
+    return updated;
   }
 } 

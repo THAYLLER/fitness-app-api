@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Get, Query, Param } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Get, Query, Param, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiTags, ApiUnauthorizedResponse, ApiBadRequestResponse, ApiQuery, ApiOkResponse, ApiNotFoundResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -7,13 +7,17 @@ import { CreateActivityResponseDto } from './dto/create-activity-response.dto';
 import { CreateActivityUseCase } from './use-cases/create-activity.use-case';
 import { ListActivitiesUseCase } from './use-cases/list-activities.use-case';
 import { GetActivityUseCase } from './use-cases/get-activity.use-case';
+import { UpdateActivityUseCase } from './use-cases/update-activity.use-case';
+import { UpdateActivityDto } from './dto/update-activity.dto';
+import { UpdateActivityResponseDto } from './dto/update-activity-response.dto';
 
 @ApiTags('Activities')
 @Controller('activities')
 export class ActivitiesController {
   constructor(private readonly createActivityUseCase: CreateActivityUseCase,
               private readonly listActivitiesUseCase: ListActivitiesUseCase,
-              private readonly getActivityUseCase: GetActivityUseCase) {}
+              private readonly getActivityUseCase: GetActivityUseCase,
+              private readonly updateActivityUseCase: UpdateActivityUseCase) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -62,5 +66,21 @@ export class ActivitiesController {
     @Param('id') id: string,
   ) {
     return this.getActivityUseCase.execute(id, user.id);
+  }
+
+  @Put(':id')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: UpdateActivityResponseDto })
+  @ApiNotFoundResponse({ description: 'Não encontrada.' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado.' })
+  @ApiBody({ type: UpdateActivityDto })
+  async update(
+    @CurrentUser() user: { id: string },
+    @Param('id') id: string,
+    @Body() body: UpdateActivityDto,
+  ) {
+    return this.updateActivityUseCase.execute({ id, userId: user.id, ...body });
   }
 } 

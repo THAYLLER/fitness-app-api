@@ -4,5 +4,6 @@ export class Activity {
   duration: number;
   intensity: string;
   createdAt: Date;
+  updatedAt: Date;
   userId: string;
 } 

@@ -106,4 +106,21 @@ describe('Auth e2e', () => {
         expect(body.id).toBe(activityId);
       });
   });
+
+  it('deve atualizar atividade', async () => {
+    const login = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email: 'user@stark.com', password: 'password123' })
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .put(`/activities/${activityId}`)
+      .set('Authorization', `Bearer ${login.body.token}`)
+      .send({ name: 'Caminhada', duration: 45, intensity: 'Moderada' })
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.name).toBe('Caminhada');
+        expect(body.duration).toBe(45);
+      });
+  });
 }); 

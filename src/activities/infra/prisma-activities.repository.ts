@@ -35,4 +35,11 @@ export class PrismaActivitiesRepository implements ActivitiesRepository {
     const activity = await this.prisma.activity.findFirst({ where: { id, userId } });
     return activity as Activity;
   }
+
+  async update(id: string, userId: string, data: { name: string; duration: number; intensity: string }): Promise<Activity | null> {
+    const activity = await this.prisma.activity.findFirst({ where: { id, userId } });
+    if (!activity) return null;
+    const updated = await this.prisma.activity.update({ where: { id }, data });
+    return updated as Activity;
+  }
 } 

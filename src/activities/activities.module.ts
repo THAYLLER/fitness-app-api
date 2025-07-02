@@ -3,6 +3,7 @@ import { ActivitiesController } from './activities.controller';
 import { CreateActivityUseCase } from './use-cases/create-activity.use-case';
 import { ListActivitiesUseCase } from './use-cases/list-activities.use-case';
 import { GetActivityUseCase } from './use-cases/get-activity.use-case';
+import { UpdateActivityUseCase } from './use-cases/update-activity.use-case';
 import { ActivitiesRepository } from './repositories/activities.repository';
 import { PrismaActivitiesRepository } from './infra/prisma-activities.repository';
 import { PrismaModule } from '../prisma/prisma.module';
@@ -14,6 +15,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     CreateActivityUseCase,
     ListActivitiesUseCase,
     GetActivityUseCase,
+    UpdateActivityUseCase,
     {
       provide: ActivitiesRepository,
       useClass: PrismaActivitiesRepository,
