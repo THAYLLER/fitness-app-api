@@ -20,4 +20,14 @@ export class PrismaActivitiesRepository implements ActivitiesRepository {
     });
     return activity as Activity;
   }
+
+  async findManyByUser(userId: string, limit: number, offset: number): Promise<Activity[]> {
+    const activities = await this.prisma.activity.findMany({
+      where: { userId },
+      take: limit,
+      skip: offset,
+      orderBy: { createdAt: 'desc' },
+    });
+    return activities as Activity[];
+  }
 } 

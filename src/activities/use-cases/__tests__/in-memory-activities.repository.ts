@@ -13,4 +13,8 @@ export class InMemoryActivitiesRepository implements ActivitiesRepository {
     this.activities.push(activity);
     return activity;
   }
+
+  async findManyByUser(userId: string, limit: number, offset: number): Promise<Activity[]> {
+    return this.activities.filter((a) => a.userId === userId).slice(offset, offset + limit);
+  }
 } 
