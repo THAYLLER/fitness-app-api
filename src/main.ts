@@ -16,6 +16,7 @@ async function bootstrap() {
     .setTitle('Fitness API')
     .setDescription('Documentação da API do Fitness App')
     .setVersion('1.0')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' })
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
