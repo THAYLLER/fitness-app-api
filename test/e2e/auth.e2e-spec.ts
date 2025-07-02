@@ -60,6 +60,15 @@ describe('Auth e2e', () => {
       .expect(200);
 
     expect(meResponse.body.email).toBe('user@stark.com');
+
+    // cria atividade
+    const activityRes = await request(app.getHttpServer())
+      .post('/activities')
+      .set('Authorization', `Bearer ${response.body.token}`)
+      .send({ name: 'Corrida', duration: 30, intensity: 'Alta' })
+      .expect(201);
+
+    expect(activityRes.body.name).toBe('Corrida');
   });
 
   it('deve retornar 401 para credenciais inválidas', async () => {
