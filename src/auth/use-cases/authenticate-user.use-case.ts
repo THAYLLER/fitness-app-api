@@ -21,8 +21,21 @@ export class AuthenticateUserUseCase {
       throw new UnauthorizedException('Credenciais inválidas.');
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
+    let passwordMatches = false;
+
+    if (user.password.startsWith('$2')) {
+      // senha já está hasheada
+      passwordMatches = await bcrypt.compare(password, user.password);
+    } else {
+      // senha antiga em texto puro
+      passwordMatches = password === user.password;
+      if (passwordMatches) {
+        const newHash = await bcrypt.hash(password, 10);
+        await this.usersRepository.updatePassword(user.id, newHash);
+      }
+    }
+
+    if (!passwordMatches) {
       throw new UnauthorizedException('Credenciais inválidas.');
     }
 

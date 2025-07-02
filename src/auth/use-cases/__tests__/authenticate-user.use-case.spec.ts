@@ -32,4 +32,16 @@ describe('AuthenticateUserUseCase', () => {
       useCase.execute({ email: 'invalid@user.com', password: '123456' }),
     ).rejects.toBeInstanceOf(UnauthorizedException);
   });
+
+  it('deve autenticar senha em texto puro e atualizar hash', async () => {
+    const usersRepository = new InMemoryUsersRepository();
+    await usersRepository.create({ email: 'plain@stark.com', password: 'plaintext' });
+    const useCase = new AuthenticateUserUseCase(usersRepository, jwtServiceMock);
+
+    const response = await useCase.execute({ email: 'plain@stark.com', password: 'plaintext' });
+
+    expect(response.token).toBe('token');
+    const updatedUser = await usersRepository.findByEmail('plain@stark.com');
+    expect(updatedUser?.password.startsWith('$2')).toBe(true);
+  });
 }); 
