@@ -42,4 +42,11 @@ export class PrismaActivitiesRepository implements ActivitiesRepository {
     const updated = await this.prisma.activity.update({ where: { id }, data });
     return updated as Activity;
   }
+
+  async delete(id: string, userId: string): Promise<boolean> {
+    const activity = await this.prisma.activity.findFirst({ where: { id, userId } });
+    if (!activity) return false;
+    await this.prisma.activity.delete({ where: { id } });
+    return true;
+  }
 } 

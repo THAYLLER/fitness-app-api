@@ -31,4 +31,11 @@ export class InMemoryActivitiesRepository implements ActivitiesRepository {
     this.activities[idx] = updated;
     return updated;
   }
+
+  async delete(id: string, userId: string): Promise<boolean> {
+    const idx = this.activities.findIndex((a) => a.id === id && a.userId === userId);
+    if (idx === -1) return false;
+    this.activities.splice(idx, 1);
+    return true;
+  }
 } 

@@ -123,4 +123,21 @@ describe('Auth e2e', () => {
         expect(body.duration).toBe(45);
       });
   });
+
+  it('deve deletar atividade', async () => {
+    const login = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email: 'user@stark.com', password: 'password123' })
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .delete(`/activities/${activityId}`)
+      .set('Authorization', `Bearer ${login.body.token}`)
+      .expect(204);
+
+    await request(app.getHttpServer())
+      .get(`/activities/${activityId}`)
+      .set('Authorization', `Bearer ${login.body.token}`)
+      .expect(404);
+  });
 }); 

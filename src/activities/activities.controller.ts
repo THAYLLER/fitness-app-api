@@ -1,5 +1,5 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Get, Query, Param, Put } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiTags, ApiUnauthorizedResponse, ApiBadRequestResponse, ApiQuery, ApiOkResponse, ApiNotFoundResponse } from '@nestjs/swagger';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Get, Query, Param, Put, Delete } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiTags, ApiUnauthorizedResponse, ApiBadRequestResponse, ApiQuery, ApiOkResponse, ApiNotFoundResponse, ApiNoContentResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CreateActivityDto } from './dto/create-activity.dto';
@@ -10,6 +10,7 @@ import { GetActivityUseCase } from './use-cases/get-activity.use-case';
 import { UpdateActivityUseCase } from './use-cases/update-activity.use-case';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 import { UpdateActivityResponseDto } from './dto/update-activity-response.dto';
+import { DeleteActivityUseCase } from './use-cases/delete-activity.use-case';
 
 @ApiTags('Activities')
 @Controller('activities')
@@ -17,7 +18,8 @@ export class ActivitiesController {
   constructor(private readonly createActivityUseCase: CreateActivityUseCase,
               private readonly listActivitiesUseCase: ListActivitiesUseCase,
               private readonly getActivityUseCase: GetActivityUseCase,
-              private readonly updateActivityUseCase: UpdateActivityUseCase) {}
+              private readonly updateActivityUseCase: UpdateActivityUseCase,
+              private readonly deleteActivityUseCase: DeleteActivityUseCase) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -82,5 +84,19 @@ export class ActivitiesController {
     @Body() body: UpdateActivityDto,
   ) {
     return this.updateActivityUseCase.execute({ id, userId: user.id, ...body });
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiBearerAuth()
+  @ApiNoContentResponse({ description: 'Excluída com sucesso.' })
+  @ApiNotFoundResponse({ description: 'Não encontrada.' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado.' })
+  async remove(
+    @CurrentUser() user: { id: string },
+    @Param('id') id: string,
+  ) {
+    await this.deleteActivityUseCase.execute(id, user.id);
   }
 } 
