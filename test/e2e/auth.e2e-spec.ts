@@ -1,10 +1,8 @@
-import request from 'supertest';
+import * as request from 'supertest';
 import { Test } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
-import { UsersRepository } from '../../src/auth/repositories/users.repository';
-import { PrismaUsersRepository } from '../../src/auth/infra/prisma-users.repository';
 
 describe('Auth e2e', () => {
   let app: INestApplication;
@@ -46,5 +44,12 @@ describe('Auth e2e', () => {
       .expect(200);
 
     expect(response.body.token).toBeDefined();
+  });
+
+  it('deve retornar 401 para credenciais inválidas', async () => {
+    await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email: 'user@stark.com', password: 'senha_errada' })
+      .expect(401);
   });
 }); 

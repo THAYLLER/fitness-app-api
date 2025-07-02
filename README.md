@@ -54,6 +54,8 @@ http://localhost:3000/docs
 | `yarn lint`        | Lint + fix                                          |
 | `yarn format`      | Formata código com Prettier                         |
 | `yarn test`        | Testes unitários                                    |
+| `yarn test:e2e`    | Testes end-to-end (fluxo Auth completo)             |
+| `yarn test:cov`    | Gera relatório de cobertura Jest                   |
 
 ## Convenções de commit
 
@@ -85,5 +87,5 @@ MIT
 8. **Testes**:
    - Unitários: repositórios em memória, mocks de dependências.
    - Integração/E2E: `supertest` exercitando fluxo real contra banco de teste.
-   - Scripts Yarn adicionados (`test:unit`, `test:e2e`, `test:cov`).
+   - Scripts Yarn disponíveis (`test`, `test:e2e`, `test:cov`).
 9. **CI/CD** (proposta): pipeline executa lint, testes unitários, integração, build e deploy (Render). Migrações aplicadas com `prisma migrate deploy`.
