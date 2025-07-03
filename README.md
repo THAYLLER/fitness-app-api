@@ -76,6 +76,9 @@ DEEPSEEK_API_KEY="your_api_key"
 DEEPSEEK_API_URL=https://api.deepseek.com/v1/chat/completions
 DEEPSEEK_MODEL=deepseek-llm
 DEEPSEEK_SYSTEM_PROMPT="Você é um assistente virtual de fitness..."
+
+# Infra / Segurança
+CORS_ORIGIN="*"            # Domínio(s) permitidos
 ```
 
 > **Atenção:** Nunca commite seus segredos; o arquivo `.env` está ignorado pelo Git.
@@ -207,3 +210,11 @@ yarn prisma migrate deploy
 ## Licença
 
 Distribuído sob licença **MIT**. Veja `LICENSE` para mais detalhes.
+
+## Observabilidade & Segurança
+
+- **Health-check**: endpoint interno `/health` (verifica banco e memória).
+- **Métricas Prometheus**: expostas em `/metrics` – prontas para scrape.
+- **Rate Limiting**: 30 requisições por minuto (`@nestjs/throttler`).
+- **Helmet**: headers de segurança aplicados globalmente.
+- **CORS**: origem configurável via `CORS_ORIGIN` no `.env`.
