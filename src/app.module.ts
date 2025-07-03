@@ -12,7 +12,7 @@ import { HealthModule } from './health/health.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrometheusModule.register(),
-    ThrottlerModule.forRoot({ ttl: 60, limit: 30 }),
+    ThrottlerModule.forRoot([{ ttl: 60, limit: 30 }]),
     AuthModule,
     UsersModule,
     ActivitiesModule,
