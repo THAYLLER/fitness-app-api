@@ -84,6 +84,12 @@ CORS_ORIGIN="*"            # Domínio(s) permitidos
 # Observabilidade / OpenTelemetry
 OTEL_SERVICE_NAME="fitness-api"
 OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+
+# Cache
+REDIS_URL="redis://localhost:6379"
+
+# Sentry
+SENTRY_URL="https://<key>@o<sentry_project>.ingest.sentry.io/<project_id>"
 ```
 
 > **Atenção:** Nunca commite seus segredos; o arquivo `.env` está ignorado pelo Git.
@@ -224,6 +230,7 @@ Distribuído sob licença **MIT**. Veja `LICENSE` para mais detalhes.
 - **Rate Limiting**: 30 requisições por minuto (`@nestjs/throttler`).
 - **Helmet**: headers de segurança aplicados globalmente.
 - **CORS**: origem configurável via `CORS_ORIGIN` no `.env`.
+- **Sentry**: captura e reporte de exceções (`SENTRY_URL`).
 
 ## Docker / Compose
 
