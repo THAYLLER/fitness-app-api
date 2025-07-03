@@ -17,9 +17,8 @@ WORKDIR /app
 
 COPY package.json yarn.lock ./
 RUN yarn install --production --prefer-offline --pure-lockfile
-COPY prisma ./prisma
-RUN yarn prisma generate
-
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/dist ./dist
 
 ENV NODE_ENV=production
