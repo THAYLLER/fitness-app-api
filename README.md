@@ -19,6 +19,7 @@
 - [Contribuição](#contribuição)
 - [Roadmap](#roadmap)
 - [Licença](#licença)
+- [Docker / Compose](#docker--compose)
 
 ## Visão Geral
 
@@ -79,6 +80,10 @@ DEEPSEEK_SYSTEM_PROMPT="Você é um assistente virtual de fitness..."
 
 # Infra / Segurança
 CORS_ORIGIN="*"            # Domínio(s) permitidos
+
+# Observabilidade / OpenTelemetry
+OTEL_SERVICE_NAME="fitness-api"
+OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
 ```
 
 > **Atenção:** Nunca commite seus segredos; o arquivo `.env` está ignorado pelo Git.
@@ -215,6 +220,26 @@ Distribuído sob licença **MIT**. Veja `LICENSE` para mais detalhes.
 
 - **Health-check**: endpoint interno `/health` (verifica banco e memória).
 - **Métricas Prometheus**: expostas em `/metrics` – prontas para scrape.
+- **Tracing**: spans OpenTelemetry exportados via OTLP (`OTEL_*`).
 - **Rate Limiting**: 30 requisições por minuto (`@nestjs/throttler`).
 - **Helmet**: headers de segurança aplicados globalmente.
 - **CORS**: origem configurável via `CORS_ORIGIN` no `.env`.
+
+## Docker / Compose
+
+Para subir todo o stack (API + Postgres + Redis + OpenTelemetry Collector):
+
+```bash
+# build e start
+$ docker compose up --build
+
+# primeiro deploy: aplicar migrações
+$ docker compose exec api yarn prisma migrate deploy
+```
+
+> O serviço expõe:
+> • API: http://localhost:3000  
+> • Swagger: http://localhost:3000/docs  
+> • Postgres: localhost:5432 (usuario/pwd: postgres)  
+> • Redis: localhost:6379  
+> • OTLP Collector: http://localhost:4318
