@@ -5,7 +5,7 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 
 COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
+RUN yarn install
 
 COPY . .
 RUN yarn prisma generate
@@ -16,7 +16,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 COPY package.json yarn.lock ./
-RUN yarn install --production --frozen-lockfile
+RUN yarn install --production --prefer-offline --pure-lockfile
 
 COPY --from=builder /app/dist ./dist
 
