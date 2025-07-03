@@ -52,7 +52,8 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "swagger-ui-express": "^5.0.1",
-    "zod": "^3.25.67"
+    "zod": "^3.25.67",
+    "prom-client": "^14.2.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
