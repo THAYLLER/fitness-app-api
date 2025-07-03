@@ -2,6 +2,13 @@
 
 [![Node.js](https://img.shields.io/badge/node-%3E=18.x-green)](https://nodejs.org) [![Yarn](https://img.shields.io/badge/yarn-%3E=1.22-blue)](https://yarnpkg.com) ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
+> 🚀 **Diferenciais deste projeto**
+> - API 100% Dockerizada, pronta para deploy local ou cloud
+> - Integração real com IA DeepSeek via API
+> - Documentação Swagger interativa gerada automaticamente
+> - Arquitetura SOLID, Clean Layers e cobertura de testes completa
+> - Observabilidade e Segurança de produção (Prometheus, Sentry, Rate Limiting)
+
 > API REST para gerenciamento de usuários, atividades e assistente virtual de fitness (Chatbot) construída em NestJS, seguindo princípios **SOLID** e boas práticas de mercado.
 
 ## 📑 Sumário
@@ -50,6 +57,19 @@ flowchart TD
     B -->|Persistência| D
     B -->|IA| E
 ```
+
+### 🔗 **Principais Endpoints**
+
+| Recurso    | Método | Rota               | Protegido | Descrição                     |
+|------------|--------|--------------------|-----------|-------------------------------|
+| Auth       | POST   | /auth/register     | Não       | Registra usuário              |
+| Auth       | POST   | /auth/login        | Não       | Login (JWT)                   |
+| Auth       | POST   | /auth/refresh      | Não       | Gera novo access token        |
+| Usuário    | GET    | /users/me          | Sim       | Dados do usuário autenticado  |
+| Atividades | POST   | /activities        | Sim       | Cadastra atividade            |
+| Atividades | GET    | /activities        | Sim       | Lista atividades              |
+| Atividades | GET    | /activities/:id    | Sim       | Detalhe de atividade          |
+| Chatbot    | POST   | /chatbot/message   | Sim       | Consulta IA DeepSeek          |
 
 ## Tecnologias Principais
 
@@ -114,8 +134,8 @@ $ yarn prisma migrate dev --name init
 # ambiente de desenvolvimento (watch)
 $ yarn start:dev
 
-# produção
-$ yarn build && yarn start:prod
+# ou suba TUDO com Docker (recomendado para avaliação)
+$ docker compose up --build
 ```
 
 Depois de inicializado:
@@ -264,3 +284,12 @@ $ docker compose exec api yarn prisma migrate deploy
 > • Postgres: localhost:5432 (usuario/pwd: postgres)  
 > • Redis: localhost:6379  
 > • OTLP Collector: http://localhost:4318
+
+## FAQ
+
+| Pergunta | Resposta |
+|-----------|----------|
+| Preciso instalar Node, Postgres ou Redis localmente? | **Não.** Rode `docker compose up` e tudo sobe automaticamente. |
+| Onde vejo a documentação das rotas? | Acesse `http://localhost:3000/docs` (Swagger). |
+| Como altero a IA? | Implemente outro provider e troque `DeepSeekService` no módulo `Chatbot`. |
+| Como executo testes? | `yarn test` unit, `yarn test:e2e` fluxos completos. |
