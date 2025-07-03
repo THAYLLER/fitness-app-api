@@ -18,6 +18,7 @@
 - [Deploy (Render)](#deploy-render)
 - [Contribuição](#contribuição)
 - [Roadmap](#roadmap)
+- [Resumo das decisões técnicas adotadas](#resumo-das-decisões-técnicas-adotadas)
 - [Licença](#licença)
 - [Docker / Compose](#docker--compose)
 
@@ -217,6 +218,19 @@ yarn prisma migrate deploy
 - Cache Redis para dados de leitura pesada
 - RBAC (Roles & Permissions) avançado
 - CI/CD completo (GitHub Actions)
+
+## Resumo das decisões técnicas adotadas
+
+1. **Arquitetura SOLID / Clean Layers**: separação clara em Entidades, Repositórios (abstrações), Use-Cases (regras de negócio), Infra (Prisma, Sentry, Redis) e Interface HTTP (Controllers + DTOs). Facilita testes, manutenção e troca de tecnologias.
+2. **NestJS**: escolhido pela robusta injeção de dependências, módulos, interceptors, pipes, guards e integração nativa com Swagger.
+3. **Prisma + PostgreSQL**: ORM tipado com migrações versionadas, geração automática de client e facilidade de refatoração de schema.
+4. **Autenticação JWT**: tokens de acesso/refresh gerados via `@nestjs/jwt`, protegidos por `JwtAuthGuard` e `JwtStrategy`.
+5. **Validações & Pipes**: `class-validator` + `ValidationPipe` global retornando HTTP 422.
+6. **Documentação**: Swagger autogerado com exemplos em todos os DTOs, disponível em `/docs`.
+7. **Qualidade de Código**: ESLint + Prettier, Husky + lint-staged para hooks pre-commit, Commitlint para mensagens padronizadas.
+8. **Testes**: unitários (repositórios em memória), E2E (supertest), cobertura Jest.
+9. **Observabilidade**: Health-check Terminus, métricas Prometheus, tracing OpenTelemetry, logs estruturados (Pino) e Sentry para erros.
+10. **Infra Docker**: Dockerfile multistage e `docker-compose` com Postgres, Redis e OTLP Collector.
 
 ## Licença
 
