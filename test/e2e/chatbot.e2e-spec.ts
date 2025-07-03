@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
+import { DeepSeekService } from '../../src/chatbot/deepseek.service';
 
 describe('Chatbot e2e', () => {
   let app: INestApplication;
@@ -10,7 +11,10 @@ describe('Chatbot e2e', () => {
   let token: string;
 
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+      .overrideProvider(DeepSeekService)
+      .useValue({ chat: async () => 'Resposta mock' })
+      .compile();
     app = moduleRef.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, errorHttpStatusCode: 422 }));
     await app.init();
@@ -18,7 +22,6 @@ describe('Chatbot e2e', () => {
     prisma = app.get(PrismaService);
     await prisma.user.deleteMany();
 
-    // registrar e login
     await request(app.getHttpServer())
       .post('/auth/register')
       .send({ email: 'bot@stark.com', password: '12345678' })

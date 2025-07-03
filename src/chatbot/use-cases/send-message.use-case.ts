@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { DeepSeekService } from '../deepseek.service';
 
 @Injectable()
 export class SendMessageUseCase {
+  constructor(private readonly deepSeek: DeepSeekService) {}
+
   async execute(message: string): Promise<string> {
-    // Mock reply - future integration with AI service
-    return 'Para hipertrofia, foque em treinos de força, séries de 8-12 repetições e sobrecarga progressiva.';
+    return this.deepSeek.chat(message);
   }
 } 

@@ -24,10 +24,8 @@ export class AuthenticateUserUseCase {
     let passwordMatches = false;
 
     if (user.password.startsWith('$2')) {
-      // senha já está hasheada
       passwordMatches = await bcrypt.compare(password, user.password);
     } else {
-      // senha antiga em texto puro
       passwordMatches = password === user.password;
       if (passwordMatches) {
         const newHash = await bcrypt.hash(password, 10);
@@ -42,7 +40,6 @@ export class AuthenticateUserUseCase {
     const payload = { sub: user.id, email: user.email };
 
     const token = await this.jwtService.signAsync(payload);
-    // Refresh token opcional (exemplo com exp maior)
     const refreshToken = await this.jwtService.signAsync(payload, {
       expiresIn: '7d',
     });

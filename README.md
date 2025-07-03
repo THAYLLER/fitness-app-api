@@ -1,21 +1,84 @@
 # Fitness App – API
 
-API REST em NestJS seguindo princípios SOLID, utilizando PostgreSQL (via Prisma) e documentação Swagger.
+[![Node.js](https://img.shields.io/badge/node-%3E=18.x-green)](https://nodejs.org) [![Yarn](https://img.shields.io/badge/yarn-%3E=1.22-blue)](https://yarnpkg.com) ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-## Pré-requisitos
+> API REST para gerenciamento de usuários, atividades e assistente virtual de fitness (Chatbot) construída em NestJS, seguindo princípios **SOLID** e boas práticas de mercado.
 
-* Node.js >= 18
-* Yarn >= 1.22
-* Banco PostgreSQL (ou URL de conexão)
+## 📑 Sumário
 
-## Variáveis de ambiente
+- [Visão Geral](#visão-geral)
+- [Tecnologias Principais](#tecnologias-principais)
+- [Variáveis de Ambiente](#variáveis-de-ambiente)
+- [Instalação](#instalação)
+- [Execução](#execução)
+- [Estrutura de Pastas](#estrutura-de-pastas)
+- [Scripts Yarn](#scripts-yarn)
+- [Testes](#testes)
+- [Banco de Dados & Migrações](#banco-de-dados--migrações)
+- [Deploy (Render)](#deploy-render)
+- [Contribuição](#contribuição)
+- [Roadmap](#roadmap)
+- [Licença](#licença)
 
-Crie um arquivo `.env` na raiz:
+## Visão Geral
+
+O Fitness App disponibiliza endpoints para:
+
+1. **Autenticação** (`/auth`) – Registro, Login e Refresh Token via JWT.
+2. **Usuários** (`/users/me`) – Dados do usuário autenticado.
+3. **Atividades** (`/activities`) – CRUD completo de atividades físicas.
+4. **Chatbot** (`/chatbot/message`) – Integração com a IA **DeepSeek** para responder dúvidas de treino/nutrição.
+
+Arquitetura fortemente inspirada em DDD e Clean Architecture, separando **Repositórios**, **Use-Cases** e **Controllers**. Todos os domínios são testados (unitários + e2e) e documentados com **Swagger**.
+
+```mermaid
+flowchart TD
+    subgraph HTTP API
+        A[Controller]
+    end
+    subgraph Core
+        B[Use-Case]
+        C[Entidade]
+    end
+    subgraph Infra
+        D[Prisma Repository]
+        E[DeepSeek Service]
+    end
+    A --> B --> C
+    B -->|Persistência| D
+    B -->|IA| E
+```
+
+## Tecnologias Principais
+
+- **NestJS 11** – Framework Node com DI poderoso.
+- **Prisma 6 + PostgreSQL** – ORM tipado & migrações.
+- **JWT** – Autenticação stateless.
+- **DeepSeek AI** – Respostas do Chatbot.
+- **Swagger** – Documentação interativa.
+- **Jest / Supertest** – Suite de testes completa.
+
+## Variáveis de Ambiente
+
+Copie `.env.example` para `.env` e preencha os valores:
 
 ```env
-DATABASE_URL="postgresql://<usuário>:<senha>@<host>:<porta>/<database>"
+# Database
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB"
 PORT=3000
+
+# JWT
+JWT_SECRET="super_secret"
+JWT_EXPIRATION=1h
+
+# DeepSeek AI
+DEEPSEEK_API_KEY="your_api_key"
+DEEPSEEK_API_URL=https://api.deepseek.com/v1/chat/completions
+DEEPSEEK_MODEL=deepseek-llm
+DEEPSEEK_SYSTEM_PROMPT="Você é um assistente virtual de fitness..."
 ```
+
+> **Atenção:** Nunca commite seus segredos; o arquivo `.env` está ignorado pelo Git.
 
 ## Instalação
 
@@ -23,69 +86,124 @@ PORT=3000
 # instalar dependências
 $ yarn install
 
-# gerar Prisma Client
+# gerar Prisma Client tipado
 $ yarn prisma generate
+
+# criar/atualizar schema local (opcional em dev)
+$ yarn prisma migrate dev --name init
 ```
 
 ## Execução
 
 ```bash
-# desenvolvimento (watch mode)
+# ambiente de desenvolvimento (watch)
 $ yarn start:dev
 
 # produção
 $ yarn build && yarn start:prod
 ```
 
-A aplicação iniciará na porta definida por `PORT` (padrão 3000). A documentação Swagger estará disponível em:
+Depois de inicializado:
 
+- API: `http://localhost:3000`
+- Swagger: `http://localhost:3000/docs`
+
+### Exemplos de requisição
+
+Autenticar e chamar Chatbot (cURL):
+
+```bash
+# login
+curl -X POST http://localhost:3000/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"user@example.com","password":"123456"}'
+
+# supondo token="XYZ"
+curl -X POST http://localhost:3000/chatbot/message \
+  -H "Authorization: Bearer $token" \
+  -H 'Content-Type: application/json' \
+  -d '{"message":"Qual o melhor treino para hipertrofia?"}'
 ```
-http://localhost:3000/docs
-```
 
-## Scripts úteis
-
-| Script             | Descrição                                           |
-|--------------------|-----------------------------------------------------|
-| `yarn start`       | Inicia a aplicação em modo default                  |
-| `yarn start:dev`   | Inicia em modo desenvolvimento com Hot Reload       |
-| `yarn build`       | Gera build de produção em `dist/`                   |
-| `yarn prisma db`   | Executa comandos Prisma (`migrate`, `studio` etc.)  |
-| `yarn lint`        | Lint + fix                                          |
-| `yarn format`      | Formata código com Prettier                         |
-| `yarn test`        | Testes unitários                                    |
-| `yarn test:e2e`    | Testes end-to-end (fluxo Auth completo)             |
-| `yarn test:cov`    | Gera relatório de cobertura Jest                   |
-
-## Convenções de commit
-
-O projeto utiliza Husky + lint-staged + Commitlint para padronizar commits. Após `git commit`, os hooks fazem lint e formatação automáticos.
-
-## Estrutura resumida
+## Estrutura de Pastas
 
 ```
 src/
- ├─ auth/            # Domínio de autenticação
- ├─ prisma/          # Serviço e módulo Prisma
- ├─ main.ts          # Bootstrap da aplicação
- └─ app.module.ts    # Módulo raiz
+ ├─ auth/          # Domínio de autenticação
+ ├─ users/         # User queries
+ ├─ activities/    # CRUD de atividades
+ ├─ chatbot/       # IA DeepSeek + use-case
+ │   └─ deepseek.service.ts
+ ├─ prisma/        # PrismaService & módulo
+ ├─ app.module.ts  # Módulo raiz
+ └─ main.ts        # Bootstrap
 ```
+
+## Scripts Yarn
+
+| Script              | Descrição                                                |
+|---------------------|----------------------------------------------------------|
+| `start`             | Inicia aplicação em modo default                         |
+| `start:dev`         | Hot Reload                                               |
+| `build`             | Build de produção em `dist/`                             |
+| `lint`              | ESLint + Prettier                                        |
+| `format`            | Formata código                                           |
+| `test`              | Testes unitários                                         |
+| `test:e2e`          | Testes end-to-end                                        |
+| `test:cov`          | Gera relatório de cobertura Jest                         |
+| `prisma generate`   | Gera Prisma Client                                       |
+| `prisma migrate`    | Executa migrações (`deploy` em produção)                 |
+
+## Testes
+
+- **Unitários**: Repositórios em memória + mocks de dependências (DeepSeek).
+- **E2E**: Banco real + substituição do `DeepSeekService` por mock, garantindo isolamento.
+
+Relatório de cobertura:
+
+```bash
+yarn test:cov
+open coverage/lcov-report/index.html
+```
+
+## Banco de Dados & Migrações
+
+Ambiente local:
+
+```bash
+yarn prisma migrate dev --name add_activity
+```
+
+Produção/Render:
+
+```bash
+yarn prisma migrate deploy
+```
+
+> Em Render, não utilize `migrate dev` pois o usuário não possui permissão DDL.
+
+## Deploy (Render)
+
+- **Build Command**: `yarn build`
+- **Start Command**: `node dist/main`
+- **Env Vars**: `DATABASE_URL`, `PORT`, `JWT_SECRET`, `DEEPSEEK_*`
+- **Post Deploy**: `yarn prisma migrate deploy`
+
+## Contribuição
+
+1. Faça fork e crie branch `feature/<nome>`.
+2. Commits seguindo Conventional Commits (hook Commitlint já configurado).
+3. Abra Pull Request com descrição detalhada.
+4. CI roda lint + testes; PR deve ficar verde.
+
+## Roadmap
+
+- Observabilidade (OpenTelemetry)
+- Rate Limiting global
+- Cache Redis para dados de leitura pesada
+- RBAC (Roles & Permissions) avançado
+- CI/CD completo (GitHub Actions)
 
 ## Licença
 
-MIT
-
-## Resumo das decisões técnicas adotadas
-
-1. **Arquitetura SOLID / Camadas**: Separação em Entidades, Repositórios (abstrações), Use-Cases (regras de negócio), Infra (Prisma) e Interface HTTP (Controllers + DTOs). Facilita testes, manutenção e troca de tecnologias.
-2. **NestJS**: Framework escolhido por oferecer módulo DI robusto, testes integrados, interceptors, pipes e integração nativa com Swagger.
-3. **Prisma + PostgreSQL**: ORM tipado, migrações versionadas, geração automática de client e facilidade para trocar de banco.
-4. **JWT Autenticação**: `@nestjs/jwt` para tokens de acesso e refresh; configuração assíncrona com `ConfigModule` para secret/timeouts via `.env`.
-5. **Validações**: `class-validator` + `ValidationPipe` global retornando HTTP 422.
-6. **Documentação**: Swagger autogerado com exemplos (DTOs anotados com `@ApiProperty`). Disponível em `/docs`.
-7. **Qualidade de código**: ESLint + Prettier integrados, Husky + lint-staged para hooks de commit, Commitlint para mensagens padronizadas.
-8. **Testes**:
-   - Unitários: repositórios em memória, mocks de dependências.
-   - Integração/E2E: `supertest` exercitando fluxo real contra banco de teste.
-   - Scripts Yarn disponíveis (`test`, `test:e2e`, `test:cov`).
-9. **CI/CD** (proposta): pipeline executa lint, testes unitários, integração, build e deploy (Render). Migrações aplicadas com `prisma migrate deploy`.
+Distribuído sob licença **MIT**. Veja `LICENSE` para mais detalhes.

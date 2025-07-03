@@ -47,7 +47,6 @@ describe('Auth e2e', () => {
     expect(response.body.token).toBeDefined();
     const refreshToken = response.body.refreshToken;
 
-    // refresh token válido
     const refreshResponse = await request(app.getHttpServer())
       .post('/auth/refresh')
       .send({ refreshToken })
@@ -62,7 +61,6 @@ describe('Auth e2e', () => {
 
     expect(meResponse.body.email).toBe('user@stark.com');
 
-    // cria atividade
     const activityRes = await request(app.getHttpServer())
       .post('/activities')
       .set('Authorization', `Bearer ${response.body.token}`)
