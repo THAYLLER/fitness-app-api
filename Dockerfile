@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---- Builder stage ----
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY package.json yarn.lock ./
@@ -12,7 +12,7 @@ RUN yarn prisma generate
 RUN yarn build
 
 # ---- Production stage ----
-FROM node:18-alpine
+FROM node:20-alpine
 WORKDIR /app
 
 COPY package.json yarn.lock ./
