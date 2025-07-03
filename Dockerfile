@@ -17,6 +17,7 @@ WORKDIR /app
 
 COPY package.json yarn.lock ./
 RUN yarn install --production --prefer-offline --pure-lockfile
+RUN yarn prisma generate
 
 COPY --from=builder /app/dist ./dist
 
