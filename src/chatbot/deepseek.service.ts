@@ -3,6 +3,7 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { AxiosResponse } from 'axios';
+import axiosRetry from 'axios-retry';
 
 @Injectable()
 export class DeepSeekService {
@@ -11,7 +12,22 @@ export class DeepSeekService {
     private readonly config: ConfigService,
   ) {}
 
+  /** Setup retry logic */
+  private setupRetry() {
+    axiosRetry(this.http.axiosRef, {
+      retries: 3,
+      retryDelay: axiosRetry.exponentialDelay,
+    });
+  }
+
+  private initialized = false;
+
   async chat(message: string): Promise<string> {
+    if (!this.initialized) {
+      this.setupRetry();
+      this.initialized = true;
+    }
+
     const apiUrl = this.config.get<string>('DEEPSEEK_API_URL');
     const model = this.config.get<string>('DEEPSEEK_MODEL', 'deepseek-llm');
     const systemPrompt = this.config.get<string>(
